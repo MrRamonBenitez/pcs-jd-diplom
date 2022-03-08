@@ -13,52 +13,51 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
 public class BooleanSearchEngine implements SearchEngine {
-    Map<String, List<Map<String, Long>>> pdfIndex;
+    private final Map<String, List<Map<String, Long>>> pdfIndex;
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
-
         this.pdfIndex = indexing(pdfsDir);
     }
 
-        private Map<String, List<Map<String, Long>>> indexing(File dir) throws IOException {
-            Map<String, List<Map<String, Long>>> pdfFiles = new HashMap<>();
-            List<Map<String, Long>> pageList;
+    private Map<String, List<Map<String, Long>>> indexing(File dir) throws IOException {
+        Map<String, List<Map<String, Long>>> pdfFiles = new HashMap<>();
+        List<Map<String, Long>> pageList;
 
-            if (dir.isDirectory()) {
+        if (dir.isDirectory()) {
 
-                try {
-                    for (File item : dir.listFiles()) {
+            try {
+                for (File item : dir.listFiles()) {
 
-                        try (PdfDocument doc = new PdfDocument(new PdfReader(item))) {
-                            pageList = new ArrayList<>();
-                            for (int i = 0; i < doc.getNumberOfPages(); i++) {
+                    try (PdfDocument doc = new PdfDocument(new PdfReader(item))) {
+                        pageList = new ArrayList<>();
 
-                                PdfPage page = doc.getPage(i + 1);
+                        for (int i = 0; i < doc.getNumberOfPages(); i++) {
+                        PdfPage page = doc.getPage(i + 1);
 
-                                String textFromPage = PdfTextExtractor.getTextFromPage(page);
+                        String textFromPage = PdfTextExtractor.getTextFromPage(page);
 
-                                String[] words = textFromPage.split("\\P{IsAlphabetic}+");
+                        String[] words = textFromPage.split("\\P{IsAlphabetic}+");
 
-                                Map<String, Long> wordСount = Arrays.stream(words)                  //мапа с парой
-                                    .map(String::toLowerCase)                                   // слово = кол-во повт.
-                                    .collect(groupingBy(Function.identity(), counting()));
+                        Map<String, Long> wordCount = Arrays.stream(words)
+                            .map(String::toLowerCase)
+                            .collect(groupingBy(Function.identity(), counting()));
 
-                                pageList.add(i, wordСount);
-                            }
-                        }
-
-                        pdfFiles.put(item.getName(), pageList);
+                        pageList.add(i, wordCount);
                     }
-
-                } catch (NullPointerException ex) {
-                    System.out.println(ex.getMessage());
                 }
 
-                return pdfFiles;
+                pdfFiles.put(item.getName(), pageList);
             }
 
-            return null;
+        } catch (NullPointerException ex) {
+            System.out.println(ex.getMessage());
         }
+
+        return pdfFiles;
+    }
+
+    return null;
+}
 
     @Override
     public List<PageEntry> search(String word) {

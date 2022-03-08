@@ -4,11 +4,8 @@ import com.google.gson.GsonBuilder;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.lang.System.out;
 
 public class Main {
@@ -22,14 +19,14 @@ public class Main {
     public static void executeServer(int port, BooleanSearchEngine engine) throws IOException {
         out.println("Starting server at " + port + "...");
 
-        while (true) {
-            try (ServerSocket serverSocket = new ServerSocket(port);
-                 Socket clientSocket = serverSocket.accept();
-                 PrintWriter out =
-                    new PrintWriter(clientSocket.getOutputStream(), true);
-                 BufferedReader in =
-                    new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
-                ) {
+        try (ServerSocket serverSocket = new ServerSocket(port);
+             Socket clientSocket = serverSocket.accept();
+             PrintWriter out =
+                new PrintWriter(clientSocket.getOutputStream(), true);
+             BufferedReader in =
+                new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
+             ) {
+                while (true) {
                     String searchWord = in.readLine();
                     List<PageEntry> searchResult = engine.search(searchWord);
 
@@ -42,6 +39,6 @@ public class Main {
 
                     out.println(response);
                 }
-            }
+        }
     }
 }
